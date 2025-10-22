@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,78 +9,43 @@ namespace LA_320_4214_OBA_Sauliak
 {
     class CLI
     {
-        public List<Player> RetrievePlayerData()
+        public static List<Player> RetrievePlayerData()
         {
             List<Player> players = new List<Player>();
-            bool addMore = true;
-
-            Console.WriteLine("=== Left-Center-Right Game ===");
-            Console.WriteLine("Players need to enter their names.\n");
-
-            while (addMore)
+            Console.WriteLine("Enter player names separated by commas:");
+            var input = Console.ReadLine();
+            if (input != null)
             {
-                Console.Write($"Enter name for player {players.Count + 1}: ");
-                string name = Console.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(name))
+                var names = input.Split(',');
+                foreach (var name in names)
                 {
-                    Console.WriteLine("Name cannot be empty. Please try again.");
-                    continue;
-                }
-
-                players.Add(new Player(name));
-                Console.WriteLine($"Player '{name}' added.\n");
-
-                if (players.Count >= 3)
-                {
-                    addMore = DecisionMorePlayers();
+                    players.Add(new Player(name.Trim()));
                 }
             }
-
             return players;
         }
-
-        public bool DecisionMorePlayers()
+        public static bool DecisionMorePlayers()
         {
-            while (true)
+            Console.WriteLine("Do you want to add more players? (y/n):");
+            var input = Console.ReadLine();
+            if (input != null && (input.ToLower() == "y" || input.ToLower() == "yes"))
             {
-                Console.Write("Add another player? (1 = yes, 2 = no): ");
-                string input = Console.ReadLine();
-
-                if (input == "1")
-                {
-                    return true;
-                }
-                else if (input == "2")
-                {
-                    return false;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input. Please enter 1 for yes or 2 for no.");
-                }
+                return true;
+            }
+            return false;
+        }
+        public static void PrintStatus(List<Player> players)
+        {
+            Console.WriteLine("Current Player Status:");
+            foreach (var player in players)
+            {
+                player.PrintNameAndChips();
             }
         }
-
-        public void PrintStatus(List<Player> players)
+        public static void PrintWinner(List<Player> players)
         {
-            Console.WriteLine("--- Current Game Status ---");
-            foreach (Player player in players)
-            {
-                Console.WriteLine(player.PrintNameAndChips());
-            }
-            Console.WriteLine("---------------------------");
-        }
-
-        public void PrintWinner(List<Player> players)
-        {
-            Player winner = players.FirstOrDefault(p => p.HasChips);
-            if (winner != null)
-            {
-                Console.WriteLine("\n*** GAME OVER ***");
-                Console.WriteLine($"Winner: {winner.Name}");
-                Console.WriteLine("*****************\n");
-            }
+            var winner = players.OrderByDescending(p => p.NumberOfDice).First();
+            Console.WriteLine($"The winner is {winner.Name} with {winner.NumberOfDice} chips!");
         }
     }
 }

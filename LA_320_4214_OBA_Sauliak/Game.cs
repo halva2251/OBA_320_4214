@@ -1,116 +1,129 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LA_320_4214_OBA_Sauliak
+namespace LA_320_4214_OBA_Sauliak;
+
+public class Game
 {
-    class Game
+    private Player _currentPlayer;
+    private List<Player> _playerList;
+    private CLI _cli;
+    private DiceCup _diceCup;
+
+    public Game()
     {
-        private Player _currentPlayer;
-        private List<Player> _playerList;
-        private CLI _cli;
-        private DiceCup _diceCup;
-
-        public Game()
+        _cli = new CLI();
+        _diceCup = new DiceCup();
+        _playerList = new List<Player>();
+    }
+    public void Play()
+    {
+        bool addingPlayers = true;
+        
+        while (addingPlayers)
         {
-            _cli = new CLI();
-            _playerList = _cli.RetrievePlayerData();
-            _diceCup = new DiceCup();
+            var newPlayers = CLI.RetrievePlayerData();
+            _playerList.AddRange(newPlayers);
+            addingPlayers = CLI.DecisionMorePlayers();
         }
-
-        public void Play()
+        bool gameOn = true;
+        while (gameOn)
         {
-            SetStartPlayer();
-            Console.WriteLine($"\nStarting player: {_currentPlayer.Name}\n");
-
-            while (MoreThanOnePlayerHasChips())
+            foreach (var player in _playerList.Where(p => p.HasChipsLeft))
             {
-                if (_currentPlayer.HasChips)
-                {
-                    Console.WriteLine($"{_currentPlayer.Name}'s turn:");
-                    List<int> diceValues = _currentPlayer.DiceRoll(_diceCup);
-                    ProcessDiceRoll(diceValues);
-                }
-
-                _currentPlayer = PlayerToTheRight();
-                _cli.PrintStatus(_playerList);
-                Console.WriteLine();
+                _currentPlayer = player;
+                var diceValues = _currentPlayer.DiceRoll(_diceCup);
+                ProcessDiceRolls(diceValues);
             }
-
-            Player winner = _playerList.FirstOrDefault(p => p.HasChips);
-            if (winner != null)
-            {
-                _cli.PrintWinner(_playerList);
-            }
+            CLI.PrintStatus(_playerList);
+            // Condition to end the game would go here
+            gameOn = MoreThanOnePlayerHasChips(); // Placeholder to end the loop
         }
+        CLI.PrintWinner(_playerList);
+    }
+    public void ProcessDiceRolls(List<int> values)
+    {
+        // 1, 2, 3 - do nothing
+        //4 Left - pass chip to left
+        //Current player -1 chip index-1 +1 chip
 
-        public void ProcessDiceRoll(List<int> values)
-        {
-            foreach (int value in values)
+        //5 center - pass chip to the pot
+        //Current player -1 chip
+
+        //6 Right - place chip to the right
+        //Current player -1 chip index+1 +1 chip
+        foreach (int value in values) {
+            Console.WriteLine($"{_currentPlayer.Name} rolled {value}");
+            switch (value)
             {
-                switch (value)
-                {
-                    case 1: // L - Left
-                        PassChipToTheLeft();
-                        break;
-                    case 2: // C - Center
-                        PlaceChipInPot();
-                        break;
-                    case 3: // R - Right
-                        PassChipToTheRight();
-                        break;
-                    case 4: // Dot
-                    case 5: // Dot
-                    case 6: // Dot
-                        break;
-                }
+                case 4:
+                    PassChipsToTheLeft();
+                    break;
+                case 5:
+                    PlaceChipInPot();
+                    break;
+                case 6:
+                    PassChipsToTheRight();
+                    break;
+                default:
+                    // Do nothing for 1, 2, 3
+                    break;
             }
         }
-
-        public void SetStartPlayer()
+    }
+    public void SetStartPlayer()
+    {
+        _currentPlayer = _playerList[0];
+    }
+    public void PlayerToTheRight()
+    {
+        _currentPlayer = _playerList[(_playerList.IndexOf(_currentPlayer) + 1) % _playerList.Count];
+    }
+    public void PlayerToTheLeft()
+    {
+        _currentPlayer = _playerList[(_playerList.IndexOf(_currentPlayer) - 1) % _playerList.Count];
+    }
+    public bool MoreThanOnePlayerHasChips()
+    {
+        return _playerList.Count(p => p.HasChipsLeft) > 1;
+    }
+    public void PassChipsToTheLeft()
+    {
+        var player  = new Player("");
+        if(_playerList.IndexOf(_currentPlayer) - 1 < 0)
         {
-            Random random = new Random();
-            int startIndex = random.Next(_playerList.Count);
-            _currentPlayer = _playerList[startIndex];
+            player = _playerList[_playerList.Count - 1];
         }
-
-        public Player PlayerToTheRight()
+        else
         {
-            int currentIndex = _playerList.IndexOf(_currentPlayer);
-            int rightIndex = (currentIndex + 1) % _playerList.Count;
-            return _playerList[rightIndex];
+            player = _playerList[(_playerList.IndexOf(_currentPlayer) - 1)];
         }
-
-        public Player PlayerToTheLeft()
+        player.RecieveChips();
+        _currentPlayer.PassOnChips();
+        Console.WriteLine($"{_currentPlayer.Name} gave {player.Name}");
+    }
+    public void PassChipsToTheRight()
+    {
+        var player = new Player("");
+        if (_playerList.IndexOf(_currentPlayer) + 1 >= _playerList.Count)
         {
-            int currentIndex = _playerList.IndexOf(_currentPlayer);
-            int leftIndex = (currentIndex - 1 + _playerList.Count) % _playerList.Count;
-            return _playerList[leftIndex];
+            player = _playerList[0];
         }
-
-        public bool MoreThanOnePlayerHasChips()
+        else
         {
-            int playersWithChips = _playerList.Count(p => p.HasChips);
-            return playersWithChips > 1;
+            player = _playerList[(_playerList.IndexOf(_currentPlayer) + 1)];
         }
-
-        public void PassChipToTheLeft()
-        {
-            _currentPlayer.PassOnChip();
-            PlayerToTheLeft().ReceiveChip();
-        }
-
-        public void PassChipToTheRight()
-        {
-            _currentPlayer.PassOnChip();
-            PlayerToTheRight().ReceiveChip();
-        }
-
-        public void PlaceChipInPot()
-        {
-            _currentPlayer.PassOnChip();
-        }
+        player.RecieveChips();
+        _currentPlayer.PassOnChips();
+        Console.WriteLine($"{_currentPlayer.Name} gave {player.Name}");
+    }
+    public void PlaceChipInPot()
+    {
+        _currentPlayer.PassOnChips();
+        Console.WriteLine($"{_currentPlayer.Name} placed a chip in the pot.");
     }
 }

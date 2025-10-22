@@ -19,19 +19,17 @@ namespace LA_320_4214_OBA_Sauliak
                 _dice.Add(new Die());
             }
         }
-
         public void Shake()
         {
-            foreach (Die die in _dice)
+            foreach (var die in _dice)
             {
                 die.Roll();
             }
         }
-
         public List<int> GetValues(int number)
         {
             List<int> values = new List<int>();
-            for (int i = 0; i < number && i < _dice.Count; i++)
+            for (int i = 0; i < number && i < NUM_DICE ; i++)
             {
                 values.Add(_dice[i].LastValue);
             }

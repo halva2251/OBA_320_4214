@@ -8,25 +8,15 @@ namespace LA_320_4214_OBA_Sauliak
 {
     class Die
     {
-        public const int _MAX_NUMMER = 6;
-        private Random _random;
-        private int _lastValue;
-        private static Random _sharedRandom = new Random();
-
-        public int LastValue
-        {
-            get { return _lastValue; }
-        }
-
-        public Die()
-        {
-            _random = _sharedRandom;
-            _lastValue = 0;
-        }
+        public const int MAX_NUMBER = 6;
+        public Random _random;
+        public int _lastValue { get; set; }
+        public int LastValue { get { return _lastValue; } }
 
         public void Roll()
         {
-            _lastValue = _random.Next(1, _MAX_NUMMER + 1);
+            _random = new Random();
+            _lastValue = _random.Next(1, MAX_NUMBER + 1);
         }
     }
 }

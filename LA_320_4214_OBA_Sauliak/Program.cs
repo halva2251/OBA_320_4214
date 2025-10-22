@@ -10,8 +10,9 @@ namespace LA_320_4214_OBA_Sauliak
     {
         static void Main(string[] args)
         {
-            Game game = new Game();
-            game.Play();
+        Game game = new Game();
+                game.Play();
         }
+        
     }
 }
