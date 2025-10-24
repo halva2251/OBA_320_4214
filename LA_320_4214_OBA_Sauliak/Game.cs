@@ -33,7 +33,7 @@ public class Game
         while (MoreThanOnePlayerHasChips())
         {
             var diceValues = _currentPlayer.DiceRoll(_diceCup);
-            ProcessDiceRolls(diceValues);
+            ProcessDiceRoll(diceValues);
 
             _currentPlayer = PlayerToTheRight(); // next player's turn (to the right)
 
@@ -43,7 +43,7 @@ public class Game
         _cli.PrintWinner(_playerList);
     }
 
-    public void ProcessDiceRolls(List<int> values)
+    public void ProcessDiceRoll(List<int> values)
     {
         // 1, 2, 3 - do nothing
         //4 Left - pass chip to left
