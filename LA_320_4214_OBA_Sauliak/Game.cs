@@ -18,7 +18,12 @@ public class Game
     {
         _cli = new CLI();
         _diceCup = new DiceCup();
-        _playerList = new List<Player>();
+        _playerList = CLI.RetrievePlayerData();
+
+        if (_playerList == null || _playerList.Count == 0)
+        {
+            throw new InvalidOperationException("No players were provided. Cannot start the game.");
+        }
     }
 
     public void Play()
@@ -72,7 +77,13 @@ public class Game
 
     public void SetStartPlayer()
     {
-        var idx = Random.Shared.Next(0, _playerList.Count);
+        var count = _playerList.Count;
+        if (count == 0)
+        {
+            throw new InvalidOperationException("No players in the game to select a start player.");
+        }
+
+        var idx = Random.Shared.Next(0, count);
         _currentPlayer = _playerList[idx];
     }
 

@@ -13,16 +13,21 @@ public class CLI
     {
         var players = new List<Player>();
         Console.WriteLine("Enter player names. Add at least 3 players.");
-        bool more = true;
-        while (more)
+
+        // ensure at least one valid player before asking to continue cause damn this indexing is ugly
+        while (true)
         {
-            Console.Write("Player name: ");
-            var name = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(name))
+            string? name;
+            do
             {
-                players.Add(new Player(name.Trim()));
-            }
-            more = DecisionMorePlayers();
+                Console.Write("Player name: ");
+                name = Console.ReadLine();
+            } while (string.IsNullOrWhiteSpace(name));
+
+            players.Add(new Player(name.Trim()));
+
+            if (!DecisionMorePlayers())
+                break;
         }
 
         if (players.Count < 3)
