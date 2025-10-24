@@ -14,7 +14,13 @@ public class CLI
         var players = new List<Player>();
         var existingNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase); // to track unique names hashing should be faster
 
+        var sep = new string('-', 50);
+        Console.WriteLine();
+        Console.WriteLine(sep);
+        Console.WriteLine("Player Setup");
+        Console.WriteLine(sep);
         Console.WriteLine("Enter player names. Add at least 3 players.");
+        Console.WriteLine(sep);
 
         // ensure at least one valid unique player before asking to continue
         while (true)
@@ -30,6 +36,7 @@ public class CLI
                 if (string.IsNullOrWhiteSpace(name))
                 {
                     Console.WriteLine("Name cannot be empty. Please enter a valid name.");
+                    Console.WriteLine(sep);
                     continue;
                 }
 
@@ -38,6 +45,7 @@ public class CLI
                 if (existingNames.Contains(name))
                 {
                     Console.WriteLine("A player with that name already exists. Please enter a different name.");
+                    Console.WriteLine(sep);
                     continue;
                 }
 
@@ -49,11 +57,15 @@ public class CLI
 
             if (!DecisionMorePlayers())
                 break;
+
+            Console.WriteLine(sep);
         }
 
         if (players.Count < 3)
         {
+            Console.WriteLine(sep);
             Console.WriteLine("At least 3 players are recommended for LCR. Add more players next run.");
+            Console.WriteLine(sep);
         }
 
         return players;
@@ -68,11 +80,19 @@ public class CLI
 
     public static void PrintStatus(List<Player> players)
     {
-        Console.WriteLine("Current Player Status:");
+        var sep = new string('-', 50);
+        Console.WriteLine();
+        Console.WriteLine(sep);
+        Console.WriteLine("Current Player Status");
+        Console.WriteLine(sep);
+
         foreach (var player in players)
         {
             player.PrintNameAndChips();
         }
+
+        Console.WriteLine(sep);
+        Console.WriteLine();
     }
 
     public static void PrintWinner(List<Player> players)
@@ -80,6 +100,14 @@ public class CLI
         // prefer the remaining player with chips; otherwise fall back to max chips
         var winner = players.FirstOrDefault(p => p.HasChipsLeft)
                      ?? players.OrderByDescending(p => p.NumberOfDice).First();
+
+        var sep = new string('-', 50);
+        Console.WriteLine();
+        Console.WriteLine(sep);
+        Console.WriteLine("Game Over");
+        Console.WriteLine(sep);
         Console.WriteLine($"The winner is {winner.Name} with {winner.NumberOfDice} chips :)");
+        Console.WriteLine(sep);
+        Console.WriteLine();
     }
 }
