@@ -18,7 +18,7 @@ public class Game
     {
         _cli = new CLI();
         _diceCup = new DiceCup();
-        _playerList = CLI.RetrievePlayerData();
+        _playerList = _cli.RetrievePlayerData();
 
         if (_playerList == null || _playerList.Count == 0)
         {
@@ -35,12 +35,12 @@ public class Game
             var diceValues = _currentPlayer.DiceRoll(_diceCup);
             ProcessDiceRolls(diceValues);
 
-            _currentPlayer = PlayerToTheRight(); // next players turn (to the right)
+            _currentPlayer = PlayerToTheRight(); // next player's turn (to the right)
 
-            CLI.PrintStatus(_playerList);
+            _cli.PrintStatus(_playerList);
         }
 
-        CLI.PrintWinner(_playerList);
+        _cli.PrintWinner(_playerList);
     }
 
     public void ProcessDiceRolls(List<int> values)
@@ -107,7 +107,7 @@ public class Game
     public void PassChipToTheLeft()
     {
         var player = PlayerToTheLeft();
-        player.RecieveChip();
+        player.ReceiveChip();
         _currentPlayer.PassOnChip();
         Console.WriteLine($"{_currentPlayer.Name} gave a chip to {player.Name}");
     }
@@ -115,7 +115,7 @@ public class Game
     public void PassChipToTheRight()
     {
         var player = PlayerToTheRight();
-        player.RecieveChip();
+        player.ReceiveChip();
         _currentPlayer.PassOnChip();
         Console.WriteLine($"{_currentPlayer.Name} gave a chip to {player.Name}");
     }

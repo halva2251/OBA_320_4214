@@ -9,7 +9,7 @@ namespace LA_320_4214_OBA_Sauliak;
 
 public class CLI
 {
-    public static List<Player> RetrievePlayerData()
+    public List<Player> RetrievePlayerData()
     {
         var players = new List<Player>();
         var existingNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase); // to track unique names hashing should be faster
@@ -19,19 +19,16 @@ public class CLI
         Console.WriteLine(sep);
         Console.WriteLine("Player Setup");
         Console.WriteLine(sep);
-        Console.WriteLine("Enter player names. Add at least 3 players.");
+        Console.WriteLine("Enter player names. Add 3 - 6 players.");
         Console.WriteLine(sep);
 
         // ensure at least one valid unique player before asking to continue
-        while (true)
+        string PromptUniqueName()
         {
-            string? name;
-
-            // keep asking until a unique and non-empty name is provided
             while (true)
             {
                 Console.Write("Player name: ");
-                name = Console.ReadLine();
+                var name = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(name))
                 {
@@ -49,36 +46,50 @@ public class CLI
                     continue;
                 }
 
-                break;
+                return name;
             }
+        }
 
+        // Ensure minimum 3 players
+        while (players.Count < 3)
+        {
+            var name = PromptUniqueName();
             players.Add(new Player(name));
             existingNames.Add(name);
-
-            if (!DecisionMorePlayers())
-                break;
-
+            Console.WriteLine(sep);
+            Console.WriteLine($"Players so far: {players.Count}.");
             Console.WriteLine(sep);
         }
 
-        if (players.Count < 3)
+        // Allow up to 6 players
+        while (players.Count < 6 && DecisionMorePlayers())
         {
             Console.WriteLine(sep);
-            Console.WriteLine("At least 3 players are recommended for LCR. Add more players next run.");
+            var name = PromptUniqueName();
+            players.Add(new Player(name));
+            existingNames.Add(name);
+        }
+
+        if (players.Count == 6)
+        {
+            Console.WriteLine(sep);
+            Console.WriteLine("Maximum of 6 players reached.");
             Console.WriteLine(sep);
         }
 
         return players;
     }
 
-    public static bool DecisionMorePlayers()
+    public bool DecisionMorePlayers()
     {
         Console.Write("Add more players? 1 (yes) / 2 (no): ");
         var input = Console.ReadLine()?.Trim();
-        return input == "1" || string.Equals(input, "yes", StringComparison.OrdinalIgnoreCase); // non case sensitive yes also means yes in case the user is a bit slow
-    }
+        return input == "1"
+               || string.Equals(input, "y", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(input, "yes", StringComparison.OrdinalIgnoreCase); 
+    }// non case sensitive yes or y also means yes in case the user is a bit slow
 
-    public static void PrintStatus(List<Player> players)
+    public void PrintStatus(List<Player> players)
     {
         var sep = new string('-', 50);
         Console.WriteLine();
@@ -95,18 +106,18 @@ public class CLI
         Console.WriteLine();
     }
 
-    public static void PrintWinner(List<Player> players)
+    public void PrintWinner(List<Player> players)
     {
-        // prefer the remaining player with chips; otherwise fall back to max chips
+        // With the game loop condition, there should be exactly one with chips.
         var winner = players.FirstOrDefault(p => p.HasChipsLeft)
-                     ?? players.OrderByDescending(p => p.NumberOfDice).First();
+                     ?? players.OrderByDescending(p => p.ChipCount).First();
 
         var sep = new string('-', 50);
         Console.WriteLine();
         Console.WriteLine(sep);
         Console.WriteLine("Game Over");
         Console.WriteLine(sep);
-        Console.WriteLine($"The winner is {winner.Name} with {winner.NumberOfDice} chips :)");
+        Console.WriteLine($"The winner is {winner.Name} with {winner.ChipCount} chips :)");
         Console.WriteLine(sep);
         Console.WriteLine();
     }

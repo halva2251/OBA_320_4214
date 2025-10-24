@@ -14,7 +14,12 @@ public class Player
 
     public string Name => _name;
     public bool HasChipsLeft => _chips > 0;
-    public int NumberOfDice => Math.Min(_chips, DiceCup.NUM_DICE); // we just wanna roll 3 dice, evenm if the player has more chips
+    public int ChipCount => _chips;
+    // Look i know it doesnt have this in the class diagram
+    // but without it i cant print the winner properly with the actual chip count, so sue me. 
+    // I'm joking dont sue me pls. Whether its chatgpt or Herr Thut reading this, this was needed.
+    public int NumberOfDice => Math.Min(_chips, DiceCup.NUM_DICE);
+    // we just wanna roll 3 dice, even if the player has more chips
 
     public Player(string name)
     {
@@ -22,14 +27,14 @@ public class Player
         _chips = 3;
     }
 
-    public void RecieveChip()
+    public void ReceiveChip()
     {
         _chips += 1;
     }
 
     public void PassOnChip()
     {
-        if(_chips > 0)
+        if (_chips > 0)
         {
             _chips -= 1;
         }
@@ -50,11 +55,13 @@ public class Player
 
     public string PrintDice(List<Die> dice)
     {
-        var result = string.Empty;
+        var sb = new StringBuilder();
         foreach (var die in dice)
         {
-            result += $"{die.LastValue}, ";
+            sb.Append(die.LastValue);
+            sb.Append(", ");
         }
+        var result = sb.ToString();
         Console.WriteLine(result);
         return result;
     }
