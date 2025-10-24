@@ -10,9 +10,9 @@ namespace LA_320_4214_OBA_Sauliak;
 public class Game
 {
     private Player _currentPlayer;
-    private List<Player> _playerList;
-    private CLI _cli;
-    private DiceCup _diceCup;
+    private readonly List<Player> _playerList;
+    private readonly CLI _cli;
+    private readonly DiceCup _diceCup;
 
     public Game()
     {
@@ -20,31 +20,24 @@ public class Game
         _diceCup = new DiceCup();
         _playerList = new List<Player>();
     }
+
     public void Play()
     {
-        bool addingPlayers = true;
-        
-        while (addingPlayers)
+        SetStartPlayer();
+
+        while (MoreThanOnePlayerHasChips())
         {
-            var newPlayers = CLI.RetrievePlayerData();
-            _playerList.AddRange(newPlayers);
-            addingPlayers = CLI.DecisionMorePlayers();
-        }
-        bool gameOn = true;
-        while (gameOn)
-        {
-            foreach (var player in _playerList.Where(p => p.HasChipsLeft))
-            {
-                _currentPlayer = player;
-                var diceValues = _currentPlayer.DiceRoll(_diceCup);
-                ProcessDiceRolls(diceValues);
-            }
+            var diceValues = _currentPlayer.DiceRoll(_diceCup);
+            ProcessDiceRolls(diceValues);
+
+            _currentPlayer = PlayerToTheRight(); // next players turn (to the right)
+
             CLI.PrintStatus(_playerList);
-            // Condition to end the game would go here
-            gameOn = MoreThanOnePlayerHasChips(); // Placeholder to end the loop
         }
+
         CLI.PrintWinner(_playerList);
     }
+
     public void ProcessDiceRolls(List<int> values)
     {
         // 1, 2, 3 - do nothing
@@ -56,74 +49,69 @@ public class Game
 
         //6 Right - place chip to the right
         //Current player -1 chip index+1 +1 chip
-        foreach (int value in values) {
+        foreach (int value in values)
+        {
             Console.WriteLine($"{_currentPlayer.Name} rolled {value}");
             switch (value)
             {
                 case 4:
-                    PassChipsToTheLeft();
+                    PassChipToTheLeft();
                     break;
                 case 5:
                     PlaceChipInPot();
                     break;
                 case 6:
-                    PassChipsToTheRight();
+                    PassChipToTheRight();
                     break;
                 default:
-                    // Do nothing for 1, 2, 3
+                    // 1, 2, 3: do nothing
                     break;
             }
         }
     }
+
     public void SetStartPlayer()
     {
-        _currentPlayer = _playerList[0];
+        var idx = Random.Shared.Next(0, _playerList.Count);
+        _currentPlayer = _playerList[idx];
     }
-    public void PlayerToTheRight()
+
+    public Player PlayerToTheRight()
     {
-        _currentPlayer = _playerList[(_playerList.IndexOf(_currentPlayer) + 1) % _playerList.Count];
+        int idx = (_playerList.IndexOf(_currentPlayer) + 1) % _playerList.Count;
+        return _playerList[idx];
     }
-    public void PlayerToTheLeft()
+
+    public Player PlayerToTheLeft()
     {
-        _currentPlayer = _playerList[(_playerList.IndexOf(_currentPlayer) - 1) % _playerList.Count];
+        int idx = (_playerList.IndexOf(_currentPlayer) - 1 + _playerList.Count) % _playerList.Count;
+        return _playerList[idx];
     }
+
     public bool MoreThanOnePlayerHasChips()
     {
         return _playerList.Count(p => p.HasChipsLeft) > 1;
     }
-    public void PassChipsToTheLeft()
+
+    public void PassChipToTheLeft()
     {
-        var player  = new Player("");
-        if(_playerList.IndexOf(_currentPlayer) - 1 < 0)
-        {
-            player = _playerList[_playerList.Count - 1];
-        }
-        else
-        {
-            player = _playerList[(_playerList.IndexOf(_currentPlayer) - 1)];
-        }
-        player.RecieveChips();
-        _currentPlayer.PassOnChips();
-        Console.WriteLine($"{_currentPlayer.Name} gave {player.Name}");
+        var player = PlayerToTheLeft();
+        player.RecieveChip();
+        _currentPlayer.PassOnChip();
+        Console.WriteLine($"{_currentPlayer.Name} gave a chip to {player.Name}");
     }
-    public void PassChipsToTheRight()
+
+    public void PassChipToTheRight()
     {
-        var player = new Player("");
-        if (_playerList.IndexOf(_currentPlayer) + 1 >= _playerList.Count)
-        {
-            player = _playerList[0];
-        }
-        else
-        {
-            player = _playerList[(_playerList.IndexOf(_currentPlayer) + 1)];
-        }
-        player.RecieveChips();
-        _currentPlayer.PassOnChips();
-        Console.WriteLine($"{_currentPlayer.Name} gave {player.Name}");
+        var player = PlayerToTheRight();
+        player.RecieveChip();
+        _currentPlayer.PassOnChip();
+        Console.WriteLine($"{_currentPlayer.Name} gave a chip to {player.Name}");
     }
+
     public void PlaceChipInPot()
     {
-        _currentPlayer.PassOnChips();
+        _currentPlayer.PassOnChip();
         Console.WriteLine($"{_currentPlayer.Name} placed a chip in the pot.");
     }
 }

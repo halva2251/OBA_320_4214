@@ -5,47 +5,55 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LA_320_4214_OBA_Sauliak
+namespace LA_320_4214_OBA_Sauliak;
+
+public class CLI
 {
-    class CLI
+    public static List<Player> RetrievePlayerData()
     {
-        public static List<Player> RetrievePlayerData()
+        var players = new List<Player>();
+        Console.WriteLine("Enter player names. Add at least 3 players.");
+        bool more = true;
+        while (more)
         {
-            List<Player> players = new List<Player>();
-            Console.WriteLine("Enter player names separated by commas:");
-            var input = Console.ReadLine();
-            if (input != null)
+            Console.Write("Player name: ");
+            var name = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(name))
             {
-                var names = input.Split(',');
-                foreach (var name in names)
-                {
-                    players.Add(new Player(name.Trim()));
-                }
+                players.Add(new Player(name.Trim()));
             }
-            return players;
+            more = DecisionMorePlayers();
         }
-        public static bool DecisionMorePlayers()
+
+        if (players.Count < 3)
         {
-            Console.WriteLine("Do you want to add more players? (y/n):");
-            var input = Console.ReadLine();
-            if (input != null && (input.ToLower() == "y" || input.ToLower() == "yes"))
-            {
-                return true;
-            }
-            return false;
+            Console.WriteLine("At least 3 players are recommended for LCR. Add more players next run.");
         }
-        public static void PrintStatus(List<Player> players)
+
+        return players;
+    }
+
+    public static bool DecisionMorePlayers()
+    {
+        Console.Write("Add more players? 1 (yes) / 2 (no): ");
+        var input = Console.ReadLine()?.Trim();
+        return input == "1";
+    }
+
+    public static void PrintStatus(List<Player> players)
+    {
+        Console.WriteLine("Current Player Status:");
+        foreach (var player in players)
         {
-            Console.WriteLine("Current Player Status:");
-            foreach (var player in players)
-            {
-                player.PrintNameAndChips();
-            }
+            player.PrintNameAndChips();
         }
-        public static void PrintWinner(List<Player> players)
-        {
-            var winner = players.OrderByDescending(p => p.NumberOfDice).First();
-            Console.WriteLine($"The winner is {winner.Name} with {winner.NumberOfDice} chips!");
-        }
+    }
+
+    public static void PrintWinner(List<Player> players)
+    {
+        // prefer the remaining player with chips; otherwise fall back to max chips
+        var winner = players.FirstOrDefault(p => p.HasChipsLeft)
+                     ?? players.OrderByDescending(p => p.NumberOfDice).First();
+        Console.WriteLine($"The winner is {winner.Name} with {winner.NumberOfDice} chips :)");
     }
 }

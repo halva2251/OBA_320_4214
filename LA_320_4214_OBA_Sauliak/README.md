@@ -1,0 +1,1 @@
+﻿had difficulties with indexing the list of players. it was out of range, with set player, playertotheright and playertotheleft.
