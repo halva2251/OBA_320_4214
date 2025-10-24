@@ -19,7 +19,7 @@ This is the project repo for a small C# console prototype of the party game Left
 
 ## My notes (what went wrong/right)
 
-- Indexing bugs: hit out-of-range issues with setting the current player and finding the player to the right/left. Fixed by carefully wrapping indices (modulo) and guarding edge cases.
+- Indexing bugs: hit out-of-range issues with setting the current player and finding the player to the right/left.
 - Changing turns: switching the current player caused weirdness. Using a temp variable during index updates stabilized it.
-- Duplicate names: right now you can still add players with the same name. That’s on the list to fix.
+- Duplicate names: you could add players with the same name. That’s fixed now.
 - Looks: started ugly, added some light decoration so it’s easier to read.
